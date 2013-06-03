@@ -1,0 +1,15 @@
+TODO:
+
+Immediate:
+(for the below, there must be no stock splits in the stock's history)
+-Be able to enter buys, sells, and dividends for CAD account through admin interface
+-Be able to enter buys, sells, and dividends for CAD through web interface
+-Be able to enter buys, sells, and dividends for USD account through admin interface
+-Be able to enter buys, sells, and dividends for USD through web interface
+-Be able to see current balance in accounts
+-Be able to get current price in accounts
+-Add support for splits
+-Show page with performance
+
+Later:
+
