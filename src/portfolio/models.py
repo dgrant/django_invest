@@ -1,8 +1,7 @@
 from django.db import models
 from django.core.urlresolvers import reverse
 import datetime
-import Quotes
-import xirr
+from common import Quotes, xirr
 
 from django.contrib.auth.models import User
 

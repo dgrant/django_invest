@@ -1,0 +1,4 @@
+[run]
+source = portfolio,common
+omit = */migrations/*
+branch = True
