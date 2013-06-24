@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}| Holdings{% endblock %}
+
+{% block content %}
+
+<h2>New holding</h2>
+
+<form action="{% url holding_create %}" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <p><input type="submit" value="Save" /></p>
+</form>
+
+{% endblock %}
+

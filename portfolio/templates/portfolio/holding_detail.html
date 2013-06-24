@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}| Holding blah{% endblock %}
+
+{% block content %}
+<a href="{% url "holdings_list" %}">all holdings</a>
+<h2>Name: {{ holding.name }}</h2>
+
+<h3>Actions:</h3>
+<form action="{{ holding.get_absolute_url }}delete/" method="post">{% csrf_token %}
+    <input type='hidden' name='delete' value='delete' />
+    <input type="submit"/ value="Delete">
+</form>
+
+<h3>Summary:</h3>
+<ul>
+    <li>Symbol: {{ holding.symbol }}</li>
+    <li>Balance: {{ holding.balance }}</li>
+    <li>Tags: {{ holding.tags }}</li>
+</ul>
+
+<h3>Transactions:</h2>
+{% load django_tables2 %}
+{% render_table transaction_table %}
+
+{% endblock %}
