@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+TEMPLATES[0]['OPTIONS']['context_processors'].append('django.template.context_processors.debug')
 
 DATABASES = {
     'default': {

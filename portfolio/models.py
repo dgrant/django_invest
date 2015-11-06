@@ -5,40 +5,41 @@ from common import Quotes, xirr
 
 from django.contrib.auth.models import User
 
+#Initially, assume just one currency
+#TODO: add multiple currency support
+#    -balance calculations
+
 class UserData(models.Model):
     user = models.ForeignKey(User, editable=False)
     class Meta:
         abstract = True
 
-#Initially, assume just one currency
-#TODO: add multiple currency support
-#    -balance calculations
 
-# Create your models here.
-class Symbol(UserData):
+class Commodity(models.Model):
     """
     This is like a currency. It's a unit of something.
     Examples: USD, CAD, XIC, BNS, TRP, GOOG
     """
     name = models.CharField(max_length=20)
-    quote_symbol = models.ForeignKey("Symbol", related_name="related_quote_symbol")
+    quote_symbol = models.ForeignKey("Commodity", related_name="related_quote_symbol", null=True, blank=True)
     longname = models.CharField(max_length=100)
 
     def __unicode__(self):
         return unicode("{0} ({1})".format(self.longname, self.name))
 
     class Meta:
-        verbose_name = "symbol/currency"
-        verbose_name_plural = "symbols/currencies"
+        verbose_name = "commodity/currency"
+        verbose_name_plural = "commodities/currencies"
+
 
 class Holding(UserData):
     """
-    This is something that you accumulate a particular Symbol in.
-    It contains a certain amount of one and only one Symbol.
-    Multiple Holdings may contain the same Symbol
+    This is something that you accumulate a particular Currency in.
+    It contains a certain amount of one and only one Currency.
+    Multiple Holdings may contain the same Currency
     """
     name = models.CharField(max_length=100)
-    symbol = models.ForeignKey("Symbol")
+    symbol = models.ForeignKey("Commodity")
     balance = models.DecimalField(max_digits=12, decimal_places=2)
     iscash = models.BooleanField()
 
@@ -54,6 +55,9 @@ class Holding(UserData):
     def update_balance(self):
         self.balance = sum(tr.shares for tr in self.transaction_set_to.all())
         self.save()
+
+        if self.iscash:
+            return
 
         # Update returns
         # TODO: need an outer loop that loops over the periods
@@ -100,6 +104,7 @@ class Holding(UserData):
 
         return ret
 
+
 class Return(UserData):
     PERIOD_all = 0
     PERIOD_1mo = 1
@@ -129,15 +134,17 @@ class Transaction(UserData):
     SELL_TYPE = 1
     DIVIDEND_CASH = 2
     STOCK_SPLIT = 3
+    DEPOSIT = 4
     TRANSACTION_CHOICES = (
                            (BUY_TYPE, "Buy"),
                            (SELL_TYPE, "Sell"),
                            (DIVIDEND_CASH, "Dividend"),
                            (STOCK_SPLIT, "Stock Split"),
+                           (DEPOSIT, "Deposit"),
                            )
 
     to_holding = models.ForeignKey("Holding", null=True, related_name="transaction_set_to")
-    from_holding = models.ForeignKey("Holding", null=True, related_name="transaction_set_from")
+    from_holding = models.ForeignKey("Holding", null=True, related_name="transaction_set_from", blank=True)
     type = models.IntegerField(choices=TRANSACTION_CHOICES)
     date = models.DateField()
     shares = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
