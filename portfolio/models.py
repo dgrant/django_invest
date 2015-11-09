@@ -14,40 +14,59 @@ class UserData(models.Model):
     class Meta:
         abstract = True
 
-
-class Commodity(models.Model):
+class Currency(models.Model):
     """
-    This is like a currency. It's a unit of something.
-    Examples: USD, CAD, XIC, BNS, TRP, GOOG
-    """
-    name = models.CharField(max_length=20)
-    quote_symbol = models.ForeignKey("Commodity", related_name="related_quote_symbol", null=True, blank=True)
-    longname = models.CharField(max_length=100)
-
-    def __unicode__(self):
-        return unicode("{0} ({1})".format(self.longname, self.name))
-
-    class Meta:
-        verbose_name = "commodity/currency"
-        verbose_name_plural = "commodities/currencies"
-
-
-class Holding(UserData):
-    """
-    This is something that you accumulate a particular Currency in.
-    It contains a certain amount of one and only one Currency.
-    Multiple Holdings may contain the same Currency
+    A currency like CAD, USD, etc...
     """
     name = models.CharField(max_length=100)
-    symbol = models.ForeignKey("Commodity")
-    balance = models.DecimalField(max_digits=12, decimal_places=2)
-    iscash = models.BooleanField()
-
-    class Meta:
-        ordering = ("name",)
+    symbol = models.CharField(max_length=20)
 
     def __unicode__(self):
-        return str(self.name)
+        return unicode('{0} ({1})'.format(self.name, self.symbol))
+
+    class Meta:
+        verbose_name_plural = 'currencies'
+
+class Exchange(models.Model):
+    name = models.CharField(max_length=80)
+    currency = models.ForeignKey('Currency')
+
+    def __unicode__(self):
+        return unicode('{0}'.format(self.name))
+
+class Stock(models.Model):
+    """
+    A stock like XIC, VTI
+    """
+    symbol = models.CharField(max_length=20)
+    quote_symbol = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
+    exchange = models.ForeignKey('Exchange')
+
+    def __unicode__(self):
+        return unicode("{0}".format(self.symbol))
+
+class Account(UserData):
+    """
+    This is an account like "David's RRSP"
+    """
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return unicode("{0}".format(self.name))
+
+class Position(UserData):
+    """
+    """
+    stock = models.ForeignKey("Stock")
+    account = models.ForeignKey("Account")
+    balance = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        ordering = ("account", "stock", 'balance',)
+
+    def __unicode__(self):
+        return str(self.stock)
 
     def get_absolute_url(self):
         return reverse('holding_detail', args=[str(self.id)])
@@ -105,51 +124,20 @@ class Holding(UserData):
         return ret
 
 
-class Return(UserData):
-    PERIOD_all = 0
-    PERIOD_1mo = 1
-    PERIOD_1yr = 2
-    PERIOD_2yr = 3
-    PERIOD_3yr = 4
-    PERIOD_5yr = 5
-    PERIOD_10yr = 6
-    PERIOD_15yr = 7
-
-    PERIOD_CHOICES = (
-                      (PERIOD_all, "all time"),
-                     )
-    holding = models.ForeignKey("Holding")
-    period = models.IntegerField(choices=PERIOD_CHOICES)
-    irr =  models.DecimalField(max_digits=12, decimal_places=2)
-
-    class Meta:
-        ordering = ("holding",)
-        verbose_name = "Annualized Return"
-
-    def __unicode__(self):
-        return unicode(self.period)+": "+unicode(self.irr*100)+"%"
-
-class Transaction(UserData):
+class Trade(UserData):
     BUY_TYPE = 0
     SELL_TYPE = 1
-    DIVIDEND_CASH = 2
-    STOCK_SPLIT = 3
-    DEPOSIT = 4
     TRANSACTION_CHOICES = (
                            (BUY_TYPE, "Buy"),
                            (SELL_TYPE, "Sell"),
-                           (DIVIDEND_CASH, "Dividend"),
-                           (STOCK_SPLIT, "Stock Split"),
-                           (DEPOSIT, "Deposit"),
                            )
-
-    to_holding = models.ForeignKey("Holding", null=True, related_name="transaction_set_to")
-    from_holding = models.ForeignKey("Holding", null=True, related_name="transaction_set_from", blank=True)
+    account = models.ForeignKey("Account")
+    stock = models.ForeignKey("Stock")
     type = models.IntegerField(choices=TRANSACTION_CHOICES)
     date = models.DateField()
-    shares = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    price = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
-    exchange_rate = models.DecimalField(max_digits=12, decimal_places=4, default=1.)
+    number_of_shares = models.DecimalField(max_digits=12, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=3)
+    exchange_rate = models.DecimalField(max_digits=12, decimal_places=4, default=1., null=True, blank=True)
     commission = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     convAmount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
@@ -193,3 +181,30 @@ class Transaction(UserData):
         buf.append(self.amount)
         buf.append(u"from " + unicode(self.from_holding))
         return u" ".join((unicode(s) for s in buf))
+
+
+class Return(UserData):
+    PERIOD_all = 0
+    PERIOD_1mo = 1
+    PERIOD_1yr = 2
+    PERIOD_2yr = 3
+    PERIOD_3yr = 4
+    PERIOD_5yr = 5
+    PERIOD_10yr = 6
+    PERIOD_15yr = 7
+
+    PERIOD_CHOICES = (
+                      (PERIOD_all, "all time"),
+                     )
+    position = models.ForeignKey("Position")
+    period = models.IntegerField(choices=PERIOD_CHOICES)
+    irr =  models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        ordering = ("position",)
+        verbose_name = "Annualized Return"
+
+    def __unicode__(self):
+        return unicode(self.period)+": "+unicode(self.irr*100)+"%"
+
+

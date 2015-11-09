@@ -1,4 +1,4 @@
-from portfolio.models import Holding, Return, Commodity, Transaction 
+from .models import * 
 from django.contrib import admin
 
 
@@ -25,32 +25,38 @@ class UserAdmin(admin.ModelAdmin):
         obj.save()
 
 
-class TransactionInline(admin.TabularInline):
-    model = Transaction
-    extra = 5
-    fk_name = "to_holding"
+#class TradeInline(admin.TabularInline):
+#    model = Trade
+#    extra = 5
+#    fk_name = "
 
 
-class HoldingAdmin(UserAdmin, admin.ModelAdmin):
-    list_display = ('name', 'symbol', 'balance', )
-    inlines = (TransactionInline,)
+class PositionAdmin(UserAdmin, admin.ModelAdmin):
+#    pass
+    list_display = ('stock', 'account', 'balance', )
+#    inlines = (TradeInline,)
 
 
-class CommodityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'longname', 'quote_symbol', )
+class StockAdmin(admin.ModelAdmin):
+    list_display = ('symbol', 'name', 'quote_symbol', 'exchange',)
 
 
-class TransactionAdmin(UserAdmin, admin.ModelAdmin):
-    list_display = ('to_holding', 'from_holding', 'type', 'date', 'shares', 'price', 'commission', 'convAmount', 'exchange_rate', 'amount',)
-    list_filter = ('to_holding', 'from_holding', 'date',)
+class TradeAdmin(UserAdmin, admin.ModelAdmin):
+    pass
+#    list_display = ('to_holding', 'from_holding', 'type', 'date', 'shares', 'price', 'commission', 'convAmount', 'exchange_rate', 'amount',)
+#    list_filter = ('to_holding', 'from_holding', 'date',)
 
 
 class ReturnAdmin(UserAdmin, admin.ModelAdmin):
-    list_display = ('holding', 'period', 'irr',)
-    list_filter = ('holding',)
+    pass
+#    list_display = ('holding', 'period', 'irr',)
+#    list_filter = ('holding',)
 
 
-admin.site.register(Holding, HoldingAdmin)
-admin.site.register(Commodity, CommodityAdmin)
-admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(Position, PositionAdmin)
+admin.site.register(Stock, StockAdmin)
+admin.site.register(Trade, TradeAdmin)
 admin.site.register(Return, ReturnAdmin)
+admin.site.register(Exchange)
+admin.site.register(Currency)
+admin.site.register(Account)
