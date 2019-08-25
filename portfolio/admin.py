@@ -52,6 +52,9 @@ class ReturnAdmin(UserAdmin, admin.ModelAdmin):
 #    list_display = ('holding', 'period', 'irr',)
 #    list_filter = ('holding',)
 
+class AccountAdmin(UserAdmin, admin.ModelAdmin):
+    pass
+
 
 admin.site.register(Position, PositionAdmin)
 admin.site.register(Stock, StockAdmin)
@@ -59,4 +62,6 @@ admin.site.register(Trade, TradeAdmin)
 admin.site.register(Return, ReturnAdmin)
 admin.site.register(Exchange)
 admin.site.register(Currency)
-admin.site.register(Account)
+admin.site.register(Account, AccountAdmin)
+admin.site.register(Dividend)
+admin.site.register(StockSplit)

@@ -2,6 +2,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 import datetime
 from common import Quotes, xirr
+from polymorphic import PolymorphicModel
 
 from django.contrib.auth.models import User
 
@@ -51,9 +52,11 @@ class Account(UserData):
     This is an account like "David's RRSP"
     """
     name = models.CharField(max_length=50)
+    currency = models.ForeignKey('Currency')
 
     def __unicode__(self):
         return unicode("{0}".format(self.name))
+
 
 class Position(UserData):
     """
@@ -124,23 +127,37 @@ class Position(UserData):
         return ret
 
 
-class Trade(UserData):
+class Transaction(PolymorphicModel, UserData):
+    account = models.ForeignKey("Account")
+    stock = models.ForeignKey("Stock")
+    date = models.DateField()
+
+class Dividend(Transaction):
+    exchange_rate = models.DecimalField(max_digits=12, decimal_places=4, default=1., null=True, blank=True)
+    # in currency of stock's exchange
+    original_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
+    # in currency of account:
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
+
+class StockSplit(Transaction):
+    share_multiplier = models.IntegerField()    
+
+class Trade(Transaction):
     BUY_TYPE = 0
     SELL_TYPE = 1
     TRANSACTION_CHOICES = (
                            (BUY_TYPE, "Buy"),
                            (SELL_TYPE, "Sell"),
                            )
-    account = models.ForeignKey("Account")
-    stock = models.ForeignKey("Stock")
+    exchange_rate = models.DecimalField(max_digits=12, decimal_places=4, default=1., null=True, blank=True)
+    # in currency of stock's exchange
+    original_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
+    # in currency of account:
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
     type = models.IntegerField(choices=TRANSACTION_CHOICES)
-    date = models.DateField()
     number_of_shares = models.DecimalField(max_digits=12, decimal_places=2)
     price = models.DecimalField(max_digits=12, decimal_places=3)
-    exchange_rate = models.DecimalField(max_digits=12, decimal_places=4, default=1., null=True, blank=True)
     commission = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    convAmount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
-    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.)
     notes = models.CharField(max_length=100, blank=True)
 
     class Meta:
@@ -148,38 +165,27 @@ class Trade(UserData):
         get_latest_by = "date"
 
     def save(self, *args, **kwargs):
-        if self.type in (Transaction.BUY_TYPE, Transaction.SELL_TYPE):
-            #change amount to be calculated based on the other fields
-            self.convAmount = (self.shares * self.price + self.commission)
-            self.amount = self.convAmount * self.exchange_rate
-        elif self.type in (Transaction.DIVIDEND_CASH,):
-            self.shares = 0.
-            self.price = 0.
-            self.commission = 0.
-            if self.convAmount == 0:
-                self.convAmount = self.amount / self.exchange_rate
-            elif self.amount == 0:
-                self.amount = self.convAmount * self.exchange_rate
-            else:
-                assert self.amount == self.convAmount * self.exchange_rate
-        #call actual save method
-        super(Transaction, self).save(*args, **kwargs)
+        if self.type in (Trade.BUY_TYPE, Trade.SELL_TYPE):
+            self.original_amount = (self.number_of_shares * self.price + self.commission)
+            self.total_amount = self.original_amount * self.exchange_rate
+        # call actual save method
+        super(Trade, self).save(*args, **kwargs)
 
         #update the associated holding with new information
-        self.to_holding.update_balance()
+#        self.to_holding.update_balance()
 
     def __unicode__(self):
         buf = []
         buf.append(self.date)
         buf.append(self.TRANSACTION_CHOICES[self.type][1])
-        buf.append(self.shares)
+        buf.append(self.number_of_shares)
         buf.append(u"shares")
         buf.append(u"of")
-        buf.append(self.to_holding)
+        buf.append(self.stock)
         buf.append(u"@" + unicode(self.price))
         buf.append(u"=")
-        buf.append(self.amount)
-        buf.append(u"from " + unicode(self.from_holding))
+        buf.append(self.total_amount)
+        buf.append(u"from " + unicode(self.account))
         return u" ".join((unicode(s) for s in buf))
 
 
