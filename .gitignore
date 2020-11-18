@@ -1,5 +1,7 @@
 /src/django_invest/local_settings.py
 /env
+/.env/
 /env.bak
 *.pyc
 .coverage
+/.idea/

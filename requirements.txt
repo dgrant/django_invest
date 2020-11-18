@@ -1,10 +1,10 @@
-Django==1.8.5
-django-grappelli==2.7.2
-mysql-python==1.2.5
+Django==3.1
+django-grappelli==2.14.2
+mysqlclient==2.0.1
 django-registration==1.0
 python-dateutil==2.1
-numpy==1.7.1
-django-tables2==1.0.4
+numpy==1.19.2
+django-tables2==2.3.1
 coverage==3.6
 django-discover-runner==1.0
 model_mommy==1.0
@@ -13,3 +13,4 @@ mock==1.0.1
 django-model-utils==1.4.0
 flake8==2.5.0
 django-polymorphic==0.7.2
+black==20.8b1

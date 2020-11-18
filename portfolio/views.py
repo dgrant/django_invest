@@ -8,11 +8,12 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from models import *
-#from tables import HoldingsTable, TransactionsTable
-#from forms import CreateEditTransactionForm, HoldingForm
+from .models import *
 
-#class HoldingCreate(CreateView):
+# from tables import HoldingsTable, TransactionsTable
+# from forms import CreateEditTransactionForm, HoldingForm
+
+# class HoldingCreate(CreateView):
 #    model = Holding
 #    form_class = HoldingForm
 
@@ -24,13 +25,13 @@ from models import *
 #        form.instance.user = self.request.user
 #        return super(HoldingCreate, self).form_valid(form)
 
-#class HoldingUpdate(UpdateView):
+# class HoldingUpdate(UpdateView):
 #    model = Holding
 
-#class HoldingDelete(DeleteView):
+# class HoldingDelete(DeleteView):
 #    model = Holding
 
-#def HoldingList(request):
+# def HoldingList(request):
 #    form = CreateEditTransactionForm()
 
 #    holdings = Holding.objects.all()
@@ -43,7 +44,7 @@ from models import *
 #                               'form': form},
 #                               context_instance=RequestContext(request))
 
-#def HoldingDetail(request, id):
+# def HoldingDetail(request, id):
 #    holding = Holding.objects.get(pk=id)
 #    transactions = Transaction.objects.filter(Q(to_holding__id=id) | Q(from_holding__id=id))
 #    transaction_table = TransactionsTable(transactions)
@@ -54,7 +55,7 @@ from models import *
 #                               'transaction_table': transaction_table},
 #                               context_instance=RequestContext(request))
 
-#def holding_delete(request, id):
+# def holding_delete(request, id):
 #    holding = Holding.objects.get(pk=id)
 #    if request.POST.get('delete'):
 #        holding.delete()

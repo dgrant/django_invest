@@ -1,7 +1,7 @@
 import unittest
 import re
 import datetime
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 
 class YahooQuoter(object):
@@ -12,34 +12,51 @@ class YahooQuoter(object):
 
     def getCurrentPrice(self):
         date_to_check = datetime.datetime.utcnow()
-        url = 'http://quote.yahoo.com/d/quotes.csv?%s'
+        url = "http://quote.yahoo.com/d/quotes.csv?%s"
         query = {
-            's': self.symbol,
-            'f': "nl1d1t1",
+            "s": self.symbol,
+            "f": "nl1d1t1",
         }
-        params = urllib.urlencode(query)
+        params = urllib.parse.urlencode(query)
 
         # Fetch from Yahoo
         full_url = url % (params,)
-        fp = urllib.urlopen(full_url)
+        fp = urllib.request.urlopen(full_url)
         lines = fp.readlines()
         fp.close()
 
         if len(lines) >= 1:
-            line_array = lines[0].split(',')
+            line_array = lines[0].split(",")
             theDate = line_array[2]
-            pattern = re.compile(r"""(?P<month>\d{1,2}) # month
+            pattern = re.compile(
+                r"""(?P<month>\d{1,2}) # month
                                      /
                                      (?P<day>\d{1,2})   # day
                                      /
                                      (?P<year>\d{4,4})  # year
-                                     """
-                                     , re.VERBOSE)
+                                     """,
+                re.VERBOSE,
+            )
             match = pattern.search(theDate)
             if match:
-                assert int(match.group('year')) == date_to_check.year, "int(match.group('year'))=" + str(int(match.group('year'))) + ' but date_to_check.year=' + date_to_check.year
-                assert int(match.group('month')) == date_to_check.month, "int(match.group('month'))=" + str(int(match.group('month'))) + ' but date_to_check.month=' + str(date_to_check.month)
-                assert int(match.group('day')) == date_to_check.day, "int(match.group('day'))=" + str(int(match.group('day'))) + ' but date_to_check.day' + str(date_to_check.day)
+                assert int(match.group("year")) == date_to_check.year, (
+                    "int(match.group('year'))="
+                    + str(int(match.group("year")))
+                    + " but date_to_check.year="
+                    + date_to_check.year
+                )
+                assert int(match.group("month")) == date_to_check.month, (
+                    "int(match.group('month'))="
+                    + str(int(match.group("month")))
+                    + " but date_to_check.month="
+                    + str(date_to_check.month)
+                )
+                assert int(match.group("day")) == date_to_check.day, (
+                    "int(match.group('day'))="
+                    + str(int(match.group("day")))
+                    + " but date_to_check.day"
+                    + str(date_to_check.day)
+                )
                 value = float(line_array[1])
             else:
                 raise Exception("Failed to get current price of %s" % (self.symbol))
@@ -60,33 +77,50 @@ class YahooQuoter(object):
         match = False
         while not match and numTries < maxTries:
             # Construct query
-            url = 'http://ichart.finance.yahoo.com/table.csv?%s'
+            url = "http://ichart.finance.yahoo.com/table.csv?%s"
             query = {
-                's': self.symbol,
-                'd': date_to_check.month - 1,
-                'e': date_to_check.day,
-                'f': date_to_check.year,
-                'a': date_to_check.month - 1,
-                'b': date_to_check.day,
-                'c': date_to_check.year,
+                "s": self.symbol,
+                "d": date_to_check.month - 1,
+                "e": date_to_check.day,
+                "f": date_to_check.year,
+                "a": date_to_check.month - 1,
+                "b": date_to_check.day,
+                "c": date_to_check.year,
             }
-            params = urllib.urlencode(query)
+            params = urllib.parse.urlencode(query)
 
             # Fetch from Yahoo
             full_url = url % (params,)
-            fp = urllib.urlopen(full_url)
+            fp = urllib.request.urlopen(full_url)
             lines = fp.readlines()
             fp.close()
 
             # Parse and check if we got a valid quote or a 404
             if len(lines) > 1:
-                line_array = lines[1].split(',')
-                pattern = re.compile(r"(?P<year>\d{4,4})\-(?P<month>\d{2,2})\-(?P<day>\d{2,2})")
+                line_array = lines[1].split(",")
+                pattern = re.compile(
+                    r"(?P<year>\d{4,4})\-(?P<month>\d{2,2})\-(?P<day>\d{2,2})"
+                )
                 match = pattern.match(line_array[0])
                 if match:
-                    assert int(match.group('year')) == date_to_check.year, "int(match.group('year'))=" + str(int(match.group('year'))) + ' but date_to_check.year=' + date_to_check.year
-                    assert int(match.group('month')) == date_to_check.month, "int(match.group('month'))=" + str(int(match.group('month'))) + ' but date_to_check.month=' + str(date_to_check.month)
-                    assert int(match.group('day')) == date_to_check.day, "int(match.group('day'))=" + str(int(match.group('day'))) + ' but date_to_check.day' + str(date_to_check.day)
+                    assert int(match.group("year")) == date_to_check.year, (
+                        "int(match.group('year'))="
+                        + str(int(match.group("year")))
+                        + " but date_to_check.year="
+                        + date_to_check.year
+                    )
+                    assert int(match.group("month")) == date_to_check.month, (
+                        "int(match.group('month'))="
+                        + str(int(match.group("month")))
+                        + " but date_to_check.month="
+                        + str(date_to_check.month)
+                    )
+                    assert int(match.group("day")) == date_to_check.day, (
+                        "int(match.group('day'))="
+                        + str(int(match.group("day")))
+                        + " but date_to_check.day"
+                        + str(date_to_check.day)
+                    )
                     value = line_array[4]
                     value = round(float(value), 2)
 
@@ -96,7 +130,7 @@ class YahooQuoter(object):
             numTries += 1
 
         if numTries == maxTries:
-            raise Exception('No quote found')
+            raise Exception("No quote found")
         else:
             if self.caching:
                 self.cache[date_to_check_orig] = value
@@ -105,33 +139,34 @@ class YahooQuoter(object):
 
 class TestQuotes(unittest.TestCase):
     def testExchangeRates(self):
-        quoter = YahooQuoter('USDCAD=X')
+        quoter = YahooQuoter("USDCAD=X")
         price = quoter.getCurrentPrice()
         assert 0.5 < price < 1.6
 
     def testGetTSXQuote(self):
-        quoter = YahooQuoter('xic.TO', caching=True)
-        self.assertEquals(81.30, quoter.getPrice(datetime.date(2006, 12, 29)))
-        self.assertEquals(81.30, quoter.getPrice(datetime.date(2006, 12, 30)))
-        self.assertEquals(81.30, quoter.getPrice(datetime.date(2006, 12, 31)))
-        self.assertEquals(81.30, quoter.getPrice(datetime.date(2007, 1, 1)))
-        self.assertEquals(81.51, quoter.getPrice(datetime.date(2007, 1, 2)))
-        self.assertEquals(80.11, quoter.getPrice(datetime.date(2007, 1, 3)))
-        self.assertEquals(78.98, quoter.getPrice(datetime.date(2007, 1, 4)))
-        self.assertEquals(78.60, quoter.getPrice(datetime.date(2007, 1, 5)))
-        self.assertEquals(79.05, quoter.getPrice(datetime.date(2007, 1, 8)))
-        self.assertEquals(14.09, quoter.getPrice(datetime.date(2009, 1, 1)))
+        quoter = YahooQuoter("xic.TO", caching=True)
+        self.assertEqual(81.30, quoter.getPrice(datetime.date(2006, 12, 29)))
+        self.assertEqual(81.30, quoter.getPrice(datetime.date(2006, 12, 30)))
+        self.assertEqual(81.30, quoter.getPrice(datetime.date(2006, 12, 31)))
+        self.assertEqual(81.30, quoter.getPrice(datetime.date(2007, 1, 1)))
+        self.assertEqual(81.51, quoter.getPrice(datetime.date(2007, 1, 2)))
+        self.assertEqual(80.11, quoter.getPrice(datetime.date(2007, 1, 3)))
+        self.assertEqual(78.98, quoter.getPrice(datetime.date(2007, 1, 4)))
+        self.assertEqual(78.60, quoter.getPrice(datetime.date(2007, 1, 5)))
+        self.assertEqual(79.05, quoter.getPrice(datetime.date(2007, 1, 8)))
+        self.assertEqual(14.09, quoter.getPrice(datetime.date(2009, 1, 1)))
 
     def testCache(self):
         """
         Test caching feature. Make sure that it is working by measuring speed
         """
         import time
-        quoter = YahooQuoter('xic.TO', caching=True)
-        self.assertEquals(79.05, quoter.getPrice(datetime.date(2007, 1, 8)))
+
+        quoter = YahooQuoter("xic.TO", caching=True)
+        self.assertEqual(79.05, quoter.getPrice(datetime.date(2007, 1, 8)))
         startTime = time.time()
-        for i in xrange(100):
-            self.assertEquals(79.05, quoter.getPrice(datetime.date(2007, 1, 8)))
+        for i in range(100):
+            self.assertEqual(79.05, quoter.getPrice(datetime.date(2007, 1, 8)))
         endTime = time.time() - startTime
         self.assertTrue(endTime < 2)
 

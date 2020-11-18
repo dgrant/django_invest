@@ -2,7 +2,7 @@
 import os
 import sys
 
-sys.path.append('util')
+sys.path.append("util")
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_invest.settings")

@@ -6,14 +6,14 @@ TEST_DISCOVER_ROOT = PROJECT_ROOT
 TEST_DISCOVER_PATTERN = "test_*"
 
 DATABASES = {
-      "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-             "NAME": ":memory:",
-            "USER": "",
-            "PASSWORD": "",
-            "HOST": "",
-            "PORT": "",
-            },
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": "",
+        "PORT": "",
+    },
 }
 
-INSTALLED_APPS += ('discover_runner',)
+INSTALLED_APPS += ("discover_runner",)
