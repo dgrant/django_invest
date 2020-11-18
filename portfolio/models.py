@@ -1,5 +1,10 @@
+from audioop import reverse
+
 from django.db import models
 import datetime
+
+from django_currentuser.db.models import CurrentUserField
+
 from common import Quotes, xirr
 
 from django.contrib.auth.models import User
@@ -10,7 +15,7 @@ from django.contrib.auth.models import User
 
 
 class UserData(models.Model):
-    user = models.ForeignKey(User, editable=False, on_delete=models.PROTECT)
+    user = CurrentUserField(on_delete=models.PROTECT)
 
     class Meta:
         abstract = True
@@ -35,9 +40,8 @@ class Exchange(models.Model):
     name = models.CharField(max_length=80)
     currency = models.ForeignKey("Currency", on_delete=models.PROTECT)
 
-    def __str__(self):
+    def __unicode__(self):
         return str("{0}".format(self.name))
-
 
 class Stock(models.Model):
     """

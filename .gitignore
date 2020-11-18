@@ -1,4 +1,5 @@
 /src/django_invest/local_settings.py
+/.venv/
 /env
 /.env/
 /env.bak
