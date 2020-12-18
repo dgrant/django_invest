@@ -21,58 +21,10 @@ class UserData(models.Model):
         abstract = True
 
 
-class Currency(models.Model):
-    """
-    A currency like CAD, USD, etc...
-    """
-
-    name = models.CharField(max_length=100)
-    symbol = models.CharField(max_length=20)
-
-    def __str__(self):
-        return str("{0} ({1})".format(self.name, self.symbol))
-
-    class Meta:
-        verbose_name_plural = "currencies"
-
-
-class Exchange(models.Model):
-    name = models.CharField(max_length=80)
-    currency = models.ForeignKey("Currency", on_delete=models.PROTECT)
-
-    def __unicode__(self):
-        return str("{0}".format(self.name))
-
-class Stock(models.Model):
-    """
-    A stock like XIC, VTI
-    """
-
-    symbol = models.CharField(max_length=20)
-    quote_symbol = models.CharField(max_length=20)
-    name = models.CharField(max_length=100)
-    exchange = models.ForeignKey("Exchange", on_delete=models.PROTECT)
-
-    def __str__(self):
-        return str("{0}".format(self.symbol))
-
-
-class Account(UserData):
-    """
-    This is an account like "David's RRSP"
-    """
-
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return str("{0}".format(self.name))
-
-
 class Position(UserData):
     """"""
 
     stock = models.ForeignKey("Stock", on_delete=models.PROTECT)
-    account = models.ForeignKey("Account", on_delete=models.PROTECT)
     balance = models.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
@@ -157,26 +109,21 @@ class Position(UserData):
         return ret
 
 
-class Trade(UserData):
-    BUY_TYPE = 0
-    SELL_TYPE = 1
-    TRANSACTION_CHOICES = (
-        (BUY_TYPE, "Buy"),
-        (SELL_TYPE, "Sell"),
-    )
-    account = models.ForeignKey("Account", on_delete=models.PROTECT)
-    stock = models.ForeignKey("Stock", on_delete=models.PROTECT)
-    type = models.IntegerField(choices=TRANSACTION_CHOICES)
+class TransactionType(models.TextChoices):
+    BUY_SHARES = 'BUY'
+    SELL_SHARES = "SELL"
+    DIVIDEND = "DIVIDEND"
+    DEPOSIT_CASH = "DEPOSIT"
+    WITHDRAW_CASH = "WITHDRAW"
+
+class Transaction(UserData):
+    type = models.IntegerField(choices=TransactionType.choices)
     date = models.DateField()
-    number_of_shares = models.DecimalField(max_digits=12, decimal_places=2)
+    number_of_shares = models.IntegerField()
     price = models.DecimalField(max_digits=12, decimal_places=3)
-    exchange_rate = models.DecimalField(
-        max_digits=12, decimal_places=4, default=1.0, null=True, blank=True
-    )
     commission = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True
     )
-    convAmount = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
     notes = models.CharField(max_length=100, blank=True)
 
@@ -188,7 +135,7 @@ class Trade(UserData):
         get_latest_by = "date"
 
     def save(self, *args, **kwargs):
-        if self.type in (Trade.BUY_TYPE, Trade.SELL_TYPE):
+        if self.type in (TransactionType.BUY_TYPE, Trade.SELL_TYPE):
             # change amount to be calculated based on the other fields
             self.convAmount = self.shares * self.price + self.commission
             self.amount = self.convAmount * self.exchange_rate
@@ -221,26 +168,3 @@ class Trade(UserData):
         buf.append(self.amount)
         buf.append("from " + str(self.from_holding))
         return " ".join((str(s) for s in buf))
-
-
-class Return(UserData):
-    PERIOD_all = 0
-    PERIOD_1mo = 1
-    PERIOD_1yr = 2
-    PERIOD_2yr = 3
-    PERIOD_3yr = 4
-    PERIOD_5yr = 5
-    PERIOD_10yr = 6
-    PERIOD_15yr = 7
-
-    PERIOD_CHOICES = ((PERIOD_all, "all time"),)
-    position = models.ForeignKey("Position", on_delete=models.PROTECT)
-    period = models.IntegerField(choices=PERIOD_CHOICES)
-    irr = models.DecimalField(max_digits=12, decimal_places=2)
-
-    class Meta:
-        ordering = ("position",)
-        verbose_name = "Annualized Return"
-
-    def __str__(self):
-        return str(self.period) + ": " + str(self.irr * 100) + "%"

@@ -5,6 +5,8 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(
     "django.template.context_processors.debug"
 )
 
+SECRET_KEY = "u76e_j(_%6bq$@(!ki!&w-#or(#)dvnr)65#xdhv2pg=+0g8k&"
+
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
