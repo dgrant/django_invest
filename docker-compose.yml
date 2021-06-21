@@ -1,0 +1,40 @@
+# From: https://docs.docker.com/samples/django/
+
+version: "3.9"
+   
+services:
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 8000:8000
+    volumes:
+      - static_data:/app/static
+    depends_on:
+      - web
+    restart: "on-failure"
+
+  web:
+    build: .
+    volumes:
+      - .:/app:rw
+      - static_data:/app/static
+    expose:
+      - 8000
+    depends_on:
+      - db
+    image: django_invest
+
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: "on-failure"
+
+volumes:
+  postgres_data:
+  static_data:
