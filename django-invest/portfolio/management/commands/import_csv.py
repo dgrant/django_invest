@@ -29,6 +29,7 @@ class Command(BaseCommand):
             with open(full_path, "w") as f:
                 f.write(lines[1])
                 f.writelines(lines[3:])
+        cad_stock, _ = Stock.objects.get_or_create(symbol="CAD")
         stocks = {stock.symbol: stock for stock in Stock.objects.all()}
         with open(full_path, newline="") as csvfile, transaction.atomic():
             Transaction.objects.all().delete()
@@ -43,22 +44,40 @@ class Command(BaseCommand):
                 transaction_.settlement_date = parse_date(row["Settlement Date"])
                 transaction_.type = parse_type(row["Activity Description"])
                 transaction_.description = row["Description"]
-                if row["Symbol"]:
-                    if row["Symbol"] in stocks:
-                        transaction_.stock = stocks[row["Symbol"]]
-                    else:
-                        stock = Stock()
-                        stock.symbol = row["Symbol"]
-                        stock.name = ""
-                        stock.quote_symbol = ""
-                        stock.save()
-                        stocks[stock.symbol] = stock
-                        transaction_.stock = stock
-                if row["Quantity"]:
-                    transaction_.number_of_shares = Decimal(row["Quantity"])
-                if row["Price"]:
-                    transaction_.price = Decimal(row["Price"])
-                transaction_.amount = Decimal(row["Total Amount"])
+                if transaction_.type in (Transaction.TransactionType.DEPOSIT, Transaction.TransactionType.WITHDRAWAL):
+                    transaction_.stock = cad_stock
+                    transaction_.number_of_shares = Decimal(row["Total Amount"])
+                    transaction_.price = "1.0"
+                else:
+                    if row["Symbol"]:
+                        if row["Symbol"] in stocks:
+                            transaction_.stock = stocks[row["Symbol"]]
+                        else:
+                            stock = Stock()
+                            stock.symbol = row["Symbol"]
+                            stock.name = ""
+                            stock.exchange = Stock.Exchange.TSX
+                            stock.save()
+                            stocks[stock.symbol] = stock
+                            transaction_.stock = stock
+                    if row["Quantity"]:
+                        transaction_.number_of_shares = Decimal(row["Quantity"])
+                    if row["Price"]:
+                        transaction_.price = Decimal(row["Price"])
+                if transaction_.type in (Transaction.TransactionType.INTEREST, Transaction.TransactionType.DIVIDEND, Transaction.TransactionType.DEPOSIT, Transaction.TransactionType.SELL):
+                    transaction_.amount = Decimal(row["Total Amount"])
+                else:
+                    transaction_.amount = -Decimal(row["Total Amount"])
+                if transaction_.type in (Transaction.TransactionType.BUY, Transaction.TransactionType.SELL):
+                    transaction_.commission = transaction_.amount - transaction_.price * transaction_.number_of_shares
+                if transaction_.amount < 0:
+                    raise Exception("Amount for transaction: {} is negative", transaction_)
+                if transaction_.type in (Transaction.TransactionType.BUY, Transaction.TransactionType.DEPOSIT, Transaction.TransactionType.NON_RESIDENT_TAX):
+                    transaction_.cash_flow = transaction_.amount
+                elif transaction_.type in (Transaction.TransactionType.SELL, Transaction.TransactionType.DIVIDEND, Transaction.TransactionType.INTEREST, Transaction.TransactionType.WITHDRAWAL):
+                    transaction_.cash_flow = -transaction_.amount
+                else:
+                    raise Exception("Unhandled transaction type: {}".format(transaction_.type))
                 transaction_.save()
 
             # We don't handle cash balances well!

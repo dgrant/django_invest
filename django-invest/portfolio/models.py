@@ -16,8 +16,13 @@ class Stock(models.Model):
     A stock like XIC, VTI
     """
 
+    class Exchange(models.TextChoices):
+        TSX = "TSX", _("Toronto Stock Exchange")
+        NYSE = "NYSE", _("New York Stock Exchange")
+        NASDAQ = "NASDAQ", _("Nasdaq")
+
     symbol = models.CharField(max_length=20, unique=True)
-    quote_symbol = models.CharField(max_length=20, blank=True, default="")
+    exchange = models.CharField(max_length=20, choices=Exchange.choices)
     name = models.CharField(max_length=100, blank=True, default="")
 
     def __str__(self):
@@ -27,10 +32,23 @@ class Stock(models.Model):
         ordering = ("symbol",)
 
 
+class Price(models.Model):
+    stock = models.ForeignKey("Stock", on_delete=models.PROTECT)
+    date = models.DateField()
+    price = models.DecimalField(max_digits=12, decimal_places=4)
+
+    def __str__(self):
+        return f"{self.date} {self.stock} {self.price}"
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["stock", "date"], name="unique_price")]
+
+
 class Position(models.Model):
     stock = models.ForeignKey("Stock", on_delete=models.PROTECT)
     account = models.ForeignKey("Account", on_delete=models.PROTECT)
     balance = models.DecimalField(max_digits=12, decimal_places=2)
+    xirr = models.DecimalField(max_digits=12, decimal_places=2, default=None, null=True, blank=True)
 
     def __str__(self):
         return f"{self.account}: {self.stock}: {self.balance} shares"
@@ -52,7 +70,7 @@ class Transaction(models.Model):
     settlement_date = models.DateField()
     type = models.CharField(max_length=20, choices=TransactionType.choices)
     stock = models.ForeignKey("Stock", on_delete=models.PROTECT, null=True, blank=True, related_name="transactions")
-    price = models.DecimalField(max_digits=12, decimal_places=3, null=True, blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
     number_of_shares = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     commission = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True
@@ -60,6 +78,7 @@ class Transaction(models.Model):
     dividend_per_share = models.DecimalField(max_digits=12, decimal_places=2, null=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
     description = models.CharField(max_length=100, blank=True, default="")
+    cash_flow = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
 
     def __str__(self):
         ret = f"{self.date} {Transaction.TransactionType(self.type).label}"
