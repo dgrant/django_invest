@@ -43,6 +43,7 @@ class Exchange(models.Model):
     def __unicode__(self):
         return str("{0}".format(self.name))
 
+
 class Stock(models.Model):
     """
     A stock like XIC, VTI
@@ -70,6 +71,7 @@ class Account(UserData):
 
 class Position(UserData):
     """"""
+
     stock = models.ForeignKey("Stock", on_delete=models.PROTECT)
     account = models.ForeignKey("Account", on_delete=models.PROTECT)
     balance = models.DecimalField(max_digits=12, decimal_places=2)

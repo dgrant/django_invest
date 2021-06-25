@@ -10,4 +10,3 @@ urlpatterns = [
     #     url(r'^holding/(\d+)/$', 'portfolio.views.HoldingDetail', name='holding_detail'),
     #     url(r'^holding/(\d+)/delete/$', 'portfolio.views.holding_delete', name='holding_delete'),
 ]
-

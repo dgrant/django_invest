@@ -27,14 +27,25 @@ class Command(BaseCommand):
         if stock.exchange == Stock.Exchange.TSX:
             symbol = symbol + ".TO"
         else:
-            self.stderr.write("Symbol: {}. We don't handle this exchange yet: {}".format(stock.symbol, stock.exchange))
+            self.stderr.write(
+                "Symbol: {}. We don't handle this exchange yet: {}".format(
+                    stock.symbol, stock.exchange
+                )
+            )
             return
         self.stdout.write("Looking up symbol {}".format(symbol))
-        new_price = round(Decimal(yfinance.Ticker(symbol).info["regularMarketPrice"], context=Context(prec=120)), 4)
+        new_price = round(
+            Decimal(
+                yfinance.Ticker(symbol).info["regularMarketPrice"],
+                context=Context(prec=120),
+            ),
+            4,
+        )
         if new_price != price.price:
-            self.stdout.write("Updating price from {} to {}".format(price.price, new_price))
+            self.stdout.write(
+                "Updating price from {} to {}".format(price.price, new_price)
+            )
             price.price = new_price
             price.save()
         else:
             self.stdout.write("No update required")
-

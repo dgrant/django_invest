@@ -22,16 +22,16 @@ class TestFunctions(TestCase):
 
     def testYearFrac(self):
 
-        date1 = datetime.date(1987,0o1,12)
-        date2 = datetime.date(1988,12,0o1)
+        date1 = datetime.date(1987, 0o1, 12)
+        date2 = datetime.date(1988, 12, 0o1)
         result = yearfrac(date1, date2)
         expected = 1.885245
         self.assertAlmostEqual(expected, result, 5)
 
     def testYearFracZero(self):
 
-        date1 = datetime.date(2000,0o1,0o1)
-        date2 = datetime.date(2000,0o1,0o1)
+        date1 = datetime.date(2000, 0o1, 0o1)
+        date2 = datetime.date(2000, 0o1, 0o1)
         result = yearfrac(date1, date2)
         expected = 0
         self.assertEqual(expected, result)
@@ -54,16 +54,16 @@ class TestFunctions(TestCase):
 
     def testYearFracAlmostFullLeapYear(self):
 
-        date1 = datetime.date(2000,0o1,0o1)
-        date2 = datetime.date(2000,12,31)
+        date1 = datetime.date(2000, 0o1, 0o1)
+        date2 = datetime.date(2000, 12, 31)
         result = yearfrac(date1, date2)
         expected = 364 / 365.0
         self.assertEqual(expected, result)
 
     def testYearFracAlmostFullYear(self):
 
-        date1 = datetime.date(2001,0o1,0o1)
-        date2 = datetime.date(2001,12,31)
+        date1 = datetime.date(2001, 0o1, 0o1)
+        date2 = datetime.date(2001, 12, 31)
         result = yearfrac(date1, date2)
         expected = 364 / 365.0
         self.assertEqual(expected, result)
@@ -92,4 +92,3 @@ class TestFunctions(TestCase):
         # fileName = '/home/david/xirr.csv'
         # transactions = readFromCSV(fileName)
         # calculateXIRRFromTransactions(transactions, True)
-

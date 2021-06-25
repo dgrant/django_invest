@@ -8,7 +8,6 @@ urlpatterns = [
     path("portfolio/", include("portfolio.urls")),
     path("admin/doc/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
-
     #    url(r'^accounts/login', 'django.contrib.auth.views.login')),
     # Examples:
     # url(r'^$', 'testproject.views.home', name='home'),

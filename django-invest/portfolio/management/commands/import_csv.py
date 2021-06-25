@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import csv
 from decimal import Decimal
@@ -39,12 +40,16 @@ class Command(BaseCommand):
                 #  'Description': 'BP#0010218625 PAYMENT RECEIVED', 'Symbol': '', 'Quantity': '', 'Price': '',
                 #  'Currency': 'CAD', 'Total Amount': '15000.00'}
                 transaction_ = Transaction()
+                transaction_.original_transaction_row = json.dumps(row)
                 transaction_.account = account
                 transaction_.date = parse_date(row["Transaction Date"])
                 transaction_.settlement_date = parse_date(row["Settlement Date"])
                 transaction_.type = parse_type(row["Activity Description"])
                 transaction_.description = row["Description"]
-                if transaction_.type in (Transaction.TransactionType.DEPOSIT, Transaction.TransactionType.WITHDRAWAL):
+                if transaction_.type in (
+                    Transaction.TransactionType.DEPOSIT,
+                    Transaction.TransactionType.WITHDRAWAL,
+                ):
                     transaction_.stock = cad_stock
                     transaction_.number_of_shares = Decimal(row["Total Amount"])
                     transaction_.price = "1.0"
@@ -64,20 +69,44 @@ class Command(BaseCommand):
                         transaction_.number_of_shares = Decimal(row["Quantity"])
                     if row["Price"]:
                         transaction_.price = Decimal(row["Price"])
-                if transaction_.type in (Transaction.TransactionType.INTEREST, Transaction.TransactionType.DIVIDEND, Transaction.TransactionType.DEPOSIT, Transaction.TransactionType.SELL):
+                if transaction_.type in (
+                    Transaction.TransactionType.INTEREST,
+                    Transaction.TransactionType.DIVIDEND,
+                    Transaction.TransactionType.DEPOSIT,
+                    Transaction.TransactionType.SELL,
+                ):
                     transaction_.amount = Decimal(row["Total Amount"])
                 else:
                     transaction_.amount = -Decimal(row["Total Amount"])
-                if transaction_.type in (Transaction.TransactionType.BUY, Transaction.TransactionType.SELL):
-                    transaction_.commission = transaction_.amount - transaction_.price * transaction_.number_of_shares
+                if transaction_.type in (
+                    Transaction.TransactionType.BUY,
+                    Transaction.TransactionType.SELL,
+                ):
+                    transaction_.commission = (
+                        transaction_.amount
+                        - transaction_.price * transaction_.number_of_shares
+                    )
                 if transaction_.amount < 0:
-                    raise Exception("Amount for transaction: {} is negative", transaction_)
-                if transaction_.type in (Transaction.TransactionType.BUY, Transaction.TransactionType.DEPOSIT, Transaction.TransactionType.NON_RESIDENT_TAX):
+                    raise Exception(
+                        "Amount for transaction: {} is negative", transaction_
+                    )
+                if transaction_.type in (
+                    Transaction.TransactionType.BUY,
+                    Transaction.TransactionType.DEPOSIT,
+                    Transaction.TransactionType.NON_RESIDENT_TAX,
+                ):
                     transaction_.cash_flow = transaction_.amount
-                elif transaction_.type in (Transaction.TransactionType.SELL, Transaction.TransactionType.DIVIDEND, Transaction.TransactionType.INTEREST, Transaction.TransactionType.WITHDRAWAL):
+                elif transaction_.type in (
+                    Transaction.TransactionType.SELL,
+                    Transaction.TransactionType.DIVIDEND,
+                    Transaction.TransactionType.INTEREST,
+                    Transaction.TransactionType.WITHDRAWAL,
+                ):
                     transaction_.cash_flow = -transaction_.amount
                 else:
-                    raise Exception("Unhandled transaction type: {}".format(transaction_.type))
+                    raise Exception(
+                        "Unhandled transaction type: {}".format(transaction_.type)
+                    )
                 transaction_.save()
 
             # We don't handle cash balances well!

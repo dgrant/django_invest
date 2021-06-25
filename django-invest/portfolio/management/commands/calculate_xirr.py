@@ -19,7 +19,9 @@ class Command(BaseCommand):
                 continue
             self.stdout.write("Updating XIRR for {}".format(position))
             stock = position.stock
-            transactions = Transaction.objects.filter(stock=stock, account=position.account)
+            transactions = Transaction.objects.filter(
+                stock=stock, account=position.account
+            )
             cash_flows = []
             dates = []
             for transaction in transactions:

@@ -15,100 +15,242 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Account',
+            name="Account",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('user', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        editable=False,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Currency',
+            name="Currency",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('symbol', models.CharField(max_length=20)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("symbol", models.CharField(max_length=20)),
             ],
             options={
-                'verbose_name_plural': 'currencies',
+                "verbose_name_plural": "currencies",
             },
         ),
         migrations.CreateModel(
-            name='Exchange',
+            name="Exchange",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=80)),
-                ('currency', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.currency')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=80)),
+                (
+                    "currency",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="portfolio.currency",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Position',
+            name="Position",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('balance', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.account')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("balance", models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="portfolio.account",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('account', 'stock', 'balance'),
+                "ordering": ("account", "stock", "balance"),
             },
         ),
         migrations.CreateModel(
-            name='Stock',
+            name="Stock",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('symbol', models.CharField(max_length=20)),
-                ('quote_symbol', models.CharField(max_length=20)),
-                ('name', models.CharField(max_length=100)),
-                ('exchange', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.exchange')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("symbol", models.CharField(max_length=20)),
+                ("quote_symbol", models.CharField(max_length=20)),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "exchange",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="portfolio.exchange",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Trade',
+            name="Trade",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.IntegerField(choices=[(0, 'Buy'), (1, 'Sell')])),
-                ('date', models.DateField()),
-                ('number_of_shares', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('price', models.DecimalField(decimal_places=3, max_digits=12)),
-                ('exchange_rate', models.DecimalField(blank=True, decimal_places=4, default=1.0, max_digits=12, null=True)),
-                ('commission', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
-                ('convAmount', models.DecimalField(decimal_places=2, default=0.0, max_digits=12)),
-                ('amount', models.DecimalField(decimal_places=2, default=0.0, max_digits=12)),
-                ('notes', models.CharField(blank=True, max_length=100)),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.account')),
-                ('stock', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.stock')),
-                ('user', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("type", models.IntegerField(choices=[(0, "Buy"), (1, "Sell")])),
+                ("date", models.DateField()),
+                (
+                    "number_of_shares",
+                    models.DecimalField(decimal_places=2, max_digits=12),
+                ),
+                ("price", models.DecimalField(decimal_places=3, max_digits=12)),
+                (
+                    "exchange_rate",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=4,
+                        default=1.0,
+                        max_digits=12,
+                        null=True,
+                    ),
+                ),
+                (
+                    "commission",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True
+                    ),
+                ),
+                (
+                    "convAmount",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=12),
+                ),
+                (
+                    "amount",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=12),
+                ),
+                ("notes", models.CharField(blank=True, max_length=100)),
+                (
+                    "account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="portfolio.account",
+                    ),
+                ),
+                (
+                    "stock",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="portfolio.stock",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        editable=False,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ('-date', 'notes'),
-                'get_latest_by': 'date',
+                "ordering": ("-date", "notes"),
+                "get_latest_by": "date",
             },
         ),
         migrations.CreateModel(
-            name='Return',
+            name="Return",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period', models.IntegerField(choices=[(0, 'all time')])),
-                ('irr', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('position', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.position')),
-                ('user', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("period", models.IntegerField(choices=[(0, "all time")])),
+                ("irr", models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "position",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="portfolio.position",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        editable=False,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Annualized Return',
-                'ordering': ('position',),
+                "verbose_name": "Annualized Return",
+                "ordering": ("position",),
             },
         ),
         migrations.AddField(
-            model_name='position',
-            name='stock',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='portfolio.stock'),
+            model_name="position",
+            name="stock",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to="portfolio.stock"
+            ),
         ),
         migrations.AddField(
-            model_name='position',
-            name='user',
-            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL),
+            model_name="position",
+            name="user",
+            field=models.ForeignKey(
+                editable=False,
+                on_delete=django.db.models.deletion.PROTECT,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

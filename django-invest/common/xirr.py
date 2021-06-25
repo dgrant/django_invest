@@ -81,7 +81,6 @@ def calculateXIRRFromTransactions(transactions, doPrint=False):
         for key in list(cfs.keys()):
             print((str(key) + ":", -(inflows[key] + outflows[key])))
 
-
     return xirr(cfall, dfall)
 
 
@@ -168,4 +167,3 @@ def yearfrac(date1, date2):
         ).days
     yearFraction = numerator / float(denominator)
     return yearFraction + wYears
-
